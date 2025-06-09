@@ -8,9 +8,9 @@ use std::str::FromStr;
 pub struct Args {
 	/// Port to listen on
 	#[arg(long, env = "PORT", default_value_t = 8080)]
-	port: u16,
+	pub port: u16,
 	#[arg(long, env = "ROUTE", value_delimiter = ';')]
-	route: Vec<Route>,
+	pub route: Vec<Route>,
 }
 
 #[derive(Debug, Clone)]

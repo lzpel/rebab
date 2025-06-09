@@ -5,4 +5,6 @@ edition = "2024"
 
 [dependencies]
 clap = { version="^4", features=["derive", "env"]}
-regex = "1.11.1"
+regex = "^1"
+tokio = { version = "^1", features = ["full"] }
+hyper = { version = "^1", features = ["full"] }
