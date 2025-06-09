@@ -15,9 +15,9 @@ pub struct Args {
 
 #[derive(Debug, Clone)]
 pub struct Route {
-	port: u16,
-	path: Regex,
-	path_into: String,
+	pub port: u16,
+	pub path: Regex,
+	pub path_into: String,
 }
 
 impl FromStr for Route {

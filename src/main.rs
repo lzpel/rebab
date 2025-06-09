@@ -1,8 +1,10 @@
 pub mod parameter;
+
+use std::net::SocketAddr;
 use clap::Parser;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
-use hyper::{Request, Response, Version, body, http};
+use hyper::{Request, Response, Version, body};
 use tokio::net::TcpListener;
 use tokio::signal;
 #[tokio::main]
@@ -10,10 +12,12 @@ async fn main() {
 	//https://github.com/hyperium/hyper/blob/master/examples/http_proxy.rs
 	//https://github.com/hyperium/hyper/blob/master/examples/graceful_shutdown.rs
 	let args = parameter::Args::parse();
-	println!("{:?}", args);
-	let addr = ([0, 0, 0, 0], args.port).into(); // プロキシの待ち受けポート
+	let addr: SocketAddr = ([0, 0, 0, 0], args.port).into(); // プロキシの待ち受けポート
 	let listener = TcpListener::bind(addr).await.expect("Can't listen");
-	println!("Listening on http://{}", addr);
+	println!("listening on http://{}", addr);
+	for (i, route) in args.route.iter().enumerate(){
+		println!("route {} {}\t=>\t{}:{}", i, route.path, route.port, route.path_into);
+	}
 	loop {
 		tokio::select! {
 			Ok((stream, _)) = listener.accept() => {
@@ -42,12 +46,13 @@ async fn process(
 		.serve_connection(io, service)
 		.await
 }
-async fn proxy_handler(req: Request<body::Incoming>) -> Result<http::Response<()>, &'static str> {
+async fn proxy_handler(req: Request<body::Incoming>) -> Result<Response<std::string::String>, &'static str> {
 	if req.version() == Version::HTTP_11 {
 		Ok(Response::builder()
-			.version(req.version())
-			.body("Hello World".into())
-			.unwrap())
+			.body("Hello World".to_string())
+			.unwrap()
+		)
+
 	} else {
 		Err("not HTTP/ 1.1, abort connection")
 	}
