@@ -310,6 +310,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "hyper-util"
+version = "0.1.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc2fdfdbff08affe55bb779f33b053aa1fe5dd5b54c257343c17edfa55711bdb"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "http",
+ "http-body",
+ "hyper",
+ "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
 name = "indexmap"
 version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -453,6 +468,7 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "hyper",
+ "hyper-util",
  "regex",
  "tokio",
 ]

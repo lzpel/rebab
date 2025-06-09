@@ -33,14 +33,14 @@ async fn main() {
 }
 
 async fn process(
-	socket: tokio::net::TcpStream,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+	stream: tokio::net::TcpStream,
+) -> hyper::Result<()> {
 	let service = service_fn(proxy_handler);
+	let io = hyper_util::rt::TokioIo::new(stream);
 	http1::Builder::new()
 		.keep_alive(true)
-		.serve_connection(socket, service)
-		.await?;
-	Ok(())
+		.serve_connection(io, service)
+		.await
 }
 async fn proxy_handler(req: Request<body::Incoming>) -> Result<http::Response<()>, &'static str> {
 	if req.version() == Version::HTTP_11 {

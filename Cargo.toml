@@ -8,3 +8,4 @@ clap = { version="^4", features=["derive", "env"]}
 regex = "^1"
 tokio = { version = "^1", features = ["full"] }
 hyper = { version = "^1", features = ["full"] }
+hyper-util = { version = "0.1.14", features = ["tokio"] }
