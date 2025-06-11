@@ -42,3 +42,19 @@ impl FromStr for Route {
 		})
 	}
 }
+
+impl Route{
+	pub fn prints<'a>(route: impl Iterator<Item = &'a Self> + Clone){
+		let max_len = route.clone().map(|r| r.path.as_str().len()).max().unwrap_or(0);
+		for (i, route) in route.enumerate() {
+			println!(
+				"route {:>2} {:width$} => {}:{}",
+				i,
+				route.path.as_str(),
+				route.port,
+				route.path_into,
+				width = max_len
+			);
+		}
+	}
+}

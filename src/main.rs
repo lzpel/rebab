@@ -15,17 +15,7 @@ async fn main() {
 	let addr: SocketAddr = ([0, 0, 0, 0], args.port).into(); // プロキシの待ち受けポート
 	let listener = TcpListener::bind(addr).await.expect("Can't listen");
 	println!("listening on http://{}", addr);
-	let max_len = args.route.iter().map(|r| r.path.as_str().len()).max().unwrap_or(0);
-	for (i, route) in args.route.iter().enumerate() {
-		println!(
-			"route {:>2} {:width$} => {}:{}",
-			i,
-			route.path.as_str(),
-			route.port,
-			route.path_into,
-			width = max_len
-		);
-	}
+	parameter::Route::prints(args.route.iter());
 	loop {
 		tokio::select! {
 			Ok((stream, _)) = listener.accept() => {
