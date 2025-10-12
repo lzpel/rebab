@@ -10,6 +10,23 @@ It listens on a single frontend socket address and forwards each incoming reques
 * 🔁 Forwards all methods/bodies; strips hop-by-hop headers
 * 🐳 Works nicely in docker-compose (service name DNS like `api:8080`)
 
+## Installation
+
+You can install `rebab` directly from [crates.io](https://crates.io/) using Cargo:
+
+```bash
+cargo install rebab
+```
+
+This will place the `rebab` binary into your Cargo `bin` directory (usually `~/.cargo/bin`).
+
+If you are developing locally instead, you can also build and run it manually:
+
+```bash
+cargo build --release
+cargo run -- --input config.json
+```
+
 ## Usage
 
 ```bash
