@@ -3,7 +3,6 @@ use tokio::net::TcpListener;
 
 use hyper::server;
 use hyper_util::rt::TokioIo;
-use tower::ServiceBuilder;
 
 pub async fn serve(
 	addr: SocketAddr,
@@ -25,7 +24,6 @@ pub async fn serve(
 		let proxy = proxy.clone();
 		tokio::task::spawn(async move {
 			let svc = crate::service::ProxyHandler { proxy };
-			let svc = ServiceBuilder::new().service(svc);
 			if let Err(err) = server::conn::http1::Builder::new()
 				.serve_connection(io, svc)
 				.await

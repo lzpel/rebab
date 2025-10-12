@@ -8,3 +8,5 @@ generate:
 	cargo run --example generate
 run: generate
 	cargo run -- --input config.json
+search-%:
+	@git grep --color -r --text -n '$*' .
