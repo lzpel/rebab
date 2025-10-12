@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Router",
+  "type": "object",
+  "properties": {
+    "frontend": {
+      "title": "Socket address to listen on",
+      "type": "string",
+      "examples": [
+        "0.0.0.0:8080"
+      ]
+    },
+    "rules": {
+      "title": "Routing rules",
+      "description": "Routes are evaluated in order; the first matching rule is applied.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Rule"
+      }
+    }
+  },
+  "required": [
+    "frontend",
+    "rules"
+  ],
+  "$defs": {
+    "Rule": {
+      "type": "object",
+      "properties": {
+        "backend_host": {
+          "title": "Backend host name or IP address",
+          "description": "Examples: 10.84.1.84, google.com, etc. Defaults to 'localhost' if omitted.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "examples": [
+            "example.com"
+          ]
+        },
+        "backend_port": {
+          "title": "Backend port number",
+          "description": "Examples: 3000, 8080, etc. Defaults to the frontend port if omitted.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint16",
+          "examples": [
+            "8080"
+          ],
+          "maximum": 65535,
+          "minimum": 0
+        },
+        "frontend_prefix": {
+          "title": "Path prefix",
+          "description": "Matches request paths that start with this prefix. Matches all paths if omitted.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "examples": [
+            "/api/"
+          ]
+        }
+      }
+    }
+  }
+}

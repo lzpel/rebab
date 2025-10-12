@@ -1,0 +1,20 @@
+{
+	"frontend": "0.0.0.0:8080",
+	"comment": "Routing follows the first matching rule.",
+	"rules":[
+		{
+			"frontend_prefix": "/api/",
+			"backend_port": 8000,
+			"comment": "Requests whose path starts with 'api' are routed to localhost:8000."
+		},
+		{
+			"frontend_prefix": "/example/",
+			"backend_host": "example.com",
+			"comment": "Requests whose path starts with 'example' are routed to example.com (the port inherits the frontend port 8080)."
+		},
+		{
+			"backend_port": 3000,
+			"comment": "All other requests are routed to localhost:3000."
+		}
+	]
+}
