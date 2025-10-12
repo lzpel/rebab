@@ -1,5 +1,8 @@
 # rebab
 
+[![GitHub License](https://img.shields.io/github/license/lzpel/rebab)](https://github.com/lzpel/rebab/blob/main/LICENSE)
+[![Crates.io](https://img.shields.io/crates/v/rebab.svg?logo=rust)](https://crates.io/crates/rebab)
+
 A tiny, rule-based reverse proxy written in Rust.
 It listens on a single frontend socket address and forwards each incoming request to a backend determined by the **first matching rule**. Perfect for local dev and simple edge routing without bringing in a full Nginx stack.
 
