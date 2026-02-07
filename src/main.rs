@@ -58,16 +58,21 @@ async fn main() {
 		}
 	});
 
-	// Start server
-	let serve_result = serve::serve(router.frontend, RebabProxy { router }).await;
+	// Start server with graceful shutdown handling
+	tokio::select! {
+		serve_result = serve::serve(router.frontend, RebabProxy { router }) => {
+			if let Err(e) = serve_result {
+				log::log(&format!("Server error: {}", e));
+			}
+		}
+		_ = tokio::signal::ctrl_c() => {
+			log::log("Shutdown signal received");
+		}
+	}
 
-	// Cleanup on server exit
+	// Cleanup on exit
 	monitor_handle.abort();
 	process_manager.terminate_all();
-
-	if let Err(e) = serve_result {
-		log::log(&format!("Server error: {}", e));
-	}
 
 	log::log("exit");
 }

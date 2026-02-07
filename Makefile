@@ -18,5 +18,8 @@ test-2:
 		--rule "port=8001,command=git log --oneline -n 50" \
 		--rule "port=8002,command=git log --stat -n 10" \
 		--rule "port=8003,command=cargo tree"
+test-3:
+	cargo run -- --frontend 0.0.0.0:9000 \
+		--rule "port=8001,command=rebab"
 search-%:
 	@git grep --color -r --text -n '$*' .

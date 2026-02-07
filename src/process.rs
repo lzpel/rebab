@@ -53,6 +53,7 @@ impl ProcessManager {
 		cmd.args(args);
 		cmd.stdout(Stdio::piped());
 		cmd.stderr(Stdio::piped());
+		cmd.stdin(Stdio::null());
 
 		// Set PORT environment variable
 		if let Some(port_value) = port {
