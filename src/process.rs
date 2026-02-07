@@ -146,16 +146,32 @@ impl ProcessManager {
 
 	/// Terminate all processes
 	pub fn terminate_all(&self) {
-		crate::log::log("Terminating all processes...");
 		let mut processes = self.processes.lock().unwrap();
+		if processes.is_empty() {
+			return;
+		}
 
-		for (rule_id, child) in processes.iter_mut() {
+		crate::log::log("Terminating all processes...");
+
+		for (rule_id, mut child) in processes.drain() {
 			crate::log::log(&format!("Terminating process [{}]...", rule_id));
+
+			#[cfg(windows)]
+			{
+				// Windows では child.kill() だけでは子プロセス（npm等）が生き残るため、
+				// taskkill を使ってプロセスツリー全体を強制終了する
+				let pid = child.id();
+				let _ = std::process::Command::new("taskkill")
+					.args(["/F", "/T", "/PID", &pid.to_string()])
+					.stdout(std::process::Stdio::null())
+					.stderr(std::process::Stdio::null())
+					.status();
+			}
+
 			let _ = child.kill();
 			let _ = child.wait();
 		}
 
-		processes.clear();
 		crate::log::log("All processes terminated");
 	}
 }
