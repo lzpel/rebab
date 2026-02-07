@@ -1,6 +1,8 @@
 use std::collections::HashMap;
+use std::io::{BufRead, BufReader};
 use std::process::{Child, Command, Stdio};
 use std::sync::{Arc, Mutex};
+use std::thread;
 
 /// プロセス管理構造体
 pub struct ProcessManager {
@@ -59,7 +61,27 @@ impl ProcessManager {
 
 		// Spawn process
 		match cmd.spawn() {
-			Ok(child) => {
+			Ok(mut child) => {
+				// Take stdout and stderr for streaming
+				let stdout = child.stdout.take();
+				let stderr = child.stderr.take();
+
+				// Spawn thread to stream stdout
+				if let Some(stdout) = stdout {
+					let rule_id_clone = rule_id.clone();
+					thread::spawn(move || {
+						stream_output(BufReader::new(stdout), rule_id_clone);
+					});
+				}
+
+				// Spawn thread to stream stderr
+				if let Some(stderr) = stderr {
+					let rule_id_clone = rule_id.clone();
+					thread::spawn(move || {
+						stream_output(BufReader::new(stderr), rule_id_clone);
+					});
+				}
+
 				let mut processes = self.processes.lock().unwrap();
 				processes.insert(rule_id, child);
 				Ok(())
@@ -140,5 +162,18 @@ impl ProcessManager {
 impl Drop for ProcessManager {
 	fn drop(&mut self) {
 		self.terminate_all();
+	}
+}
+
+/// Stream output from a child process
+fn stream_output<R: std::io::Read>(reader: BufReader<R>, rule_id: String) {
+	for line in reader.lines() {
+		match line {
+			Ok(line) => {
+				// Format: rebab: rule_id: line content
+				crate::log::log(&format!("{}: {}", rule_id, line));
+			}
+			Err(_) => break,
+		}
 	}
 }
