@@ -2,7 +2,7 @@ use clap::Parser;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-const SCHEMA: &'static str = include_str!("schema.json");
+use std::str::FromStr;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Router {
@@ -22,42 +22,77 @@ pub struct Rule {
 		description = "Matches request paths that start with this prefix. Matches all paths if omitted.",
 		example = "/api/"
 	)]
+	#[serde(alias = "prefix")]
 	pub frontend_prefix: Option<String>,
 	#[schemars(
 		title = "Backend host name or IP address",
 		description = "Examples: 10.84.1.84, google.com, etc. Defaults to 'localhost' if omitted.",
 		example = "example.com"
 	)]
+	#[serde(alias = "host")]
 	pub backend_host: Option<String>,
 	#[schemars(
 		title = "Backend port number",
 		description = "Examples: 3000, 8080, etc. Defaults to the frontend port if omitted.",
 		example = "8080"
 	)]
+	#[serde(alias = "port")]
 	pub backend_port: Option<u16>,
+	#[schemars(
+		title = "Command to execute",
+		description = "Optional command to execute when this rule is loaded. PORT environment variable will be set to backend_port if specified.",
+		example = "npm run dev"
+	)]
+	pub command: Option<String>,
+}
+
+impl FromStr for Rule {
+	type Err = String;
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let s = s.replace(',', "&");
+		serde_urlencoded::from_str(&s).map_err(|e| e.to_string())
+	}
 }
 
 #[derive(Debug, Parser, Clone)]
-#[command(author, version, after_help=SCHEMA)]
+#[command(author, version)]
 pub struct Args {
 	#[arg(
 		short = 'i',
 		long = "input",
 		value_name = "FILE",
-		required = true,
 		help = "path for config json"
 	)]
-	pub input: PathBuf,
+	pub input: Option<PathBuf>,
+
+	#[arg(long, help = "Socket address to listen on")]
+	pub frontend: Option<std::net::SocketAddr>,
+
+	#[arg(long = "rule", value_parser = Rule::from_str, help = "Add a routing rule (format: prefix=/p,host=example.com,port=80)")]
+	pub rules: Vec<Rule>,
 }
+
 pub fn parse() -> Args {
 	crate::config::Args::parse()
 }
+
 pub fn load(args: &Args) -> Result<Router, String> {
-	let v = std::fs::read_to_string(&args.input).map_err(|v| {
-		format!(
-			"no file {}\n{v:?}",
-			&args.input.to_string_lossy().to_string()
-		)
-	})?;
-	serde_json::from_str(&v).map_err(|v| v.to_string())
+	let mut router = Router {
+		frontend: "0.0.0.0:8080".parse().unwrap(),
+		rules: vec![],
+	};
+	if let Some(input) = &args.input {
+		let v = std::fs::read_to_string(input)
+			.map_err(|v| format!("no file {}\n{v:?}", &input.to_string_lossy().to_string()))?;
+		router = serde_json::from_str(&v).map_err(|v| v.to_string())?
+	}
+
+	if let Some(frontend) = args.frontend {
+		router.frontend = frontend;
+	}
+
+	// CLIで指定されたルールを追加
+	router.rules.extend(args.rules.clone());
+
+	Ok(router)
 }

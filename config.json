@@ -1,20 +1,22 @@
 {
 	"frontend": "0.0.0.0:8080",
-	"comment": "Routing follows the first matching rule.",
-	"rules":[
+	"comment": "Example configuration with command execution",
+	"rules": [
 		{
 			"frontend_prefix": "/api/",
 			"backend_port": 8000,
-			"comment": "Requests whose path starts with 'api' are routed to localhost:8000."
+			"command": "echo API server started",
+			"comment": "This rule will execute 'echo API server started' with PORT=8000"
 		},
 		{
-			"frontend_prefix": "/example/",
-			"backend_host": "example.com",
-			"comment": "Requests whose path starts with 'example' are routed to example.com (the port inherits the frontend port 8080)."
-		},
-		{
+			"frontend_prefix": "/frontend/",
 			"backend_port": 3000,
-			"comment": "All other requests are routed to localhost:3000."
+			"command": "echo Frontend server started",
+			"comment": "This rule will execute 'echo Frontend server started' with PORT=3000"
+		},
+		{
+			"backend_port": 9000,
+			"comment": "Default route without command"
 		}
 	]
 }

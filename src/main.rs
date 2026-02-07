@@ -1,6 +1,7 @@
 mod body;
 mod config;
 mod log;
+mod process;
 mod proxy;
 mod serve;
 mod service;
@@ -9,13 +10,15 @@ mod service;
 async fn main() {
 	let args = config::parse();
 
-	// 存在チェックなど
-	if !args.input.exists() {
-		println!("入力ファイルが見つかりません: {}", args.input.display());
-		return;
+	// Check if input file exists
+	if let Some(path) = &args.input {
+		if !path.exists() {
+			println!("Input file not found: {}", path.display());
+			return;
+		}
 	}
 
-	// 入力JSON（実運用ではファイルやstdinから読んでください）
+	// Load configuration
 	let router = match config::load(&args) {
 		Ok(v) => v,
 		Err(v) => {
@@ -24,7 +27,48 @@ async fn main() {
 		}
 	};
 
-	let _ = serve::serve(router.frontend, RebabProxy { router }).await;
+	// Create process manager and wrap in Arc
+	let process_manager = std::sync::Arc::new(process::ProcessManager::new());
+
+	// Execute commands for each rule
+	for (index, rule) in router.rules.iter().enumerate() {
+		if let Some(command) = &rule.command {
+			let rule_id = format!("rule_{}", index);
+			if let Err(e) = process_manager.spawn_command(rule_id, command, rule.backend_port) {
+				log::log(&format!("Command execution error: {}", e));
+				log::log("Terminating all processes");
+				process_manager.terminate_all();
+				return;
+			}
+		}
+	}
+
+	// Start process monitoring task
+	let pm_for_monitor = process_manager.clone();
+	let monitor_handle = tokio::spawn(async move {
+		let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(1));
+		loop {
+			interval.tick().await;
+			if let Err(e) = pm_for_monitor.check_all() {
+				log::log(&format!("Process monitoring error: {}", e));
+				log::log("Terminating all processes");
+				pm_for_monitor.terminate_all();
+				std::process::exit(1);
+			}
+		}
+	});
+
+	// Start server
+	let serve_result = serve::serve(router.frontend, RebabProxy { router }).await;
+
+	// Cleanup on server exit
+	monitor_handle.abort();
+	process_manager.terminate_all();
+
+	if let Err(e) = serve_result {
+		log::log(&format!("Server error: {}", e));
+	}
+
 	log::log("exit");
 }
 struct RebabProxy {

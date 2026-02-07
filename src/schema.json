@@ -52,6 +52,17 @@
           "maximum": 65535,
           "minimum": 0
         },
+        "command": {
+          "title": "Command to execute",
+          "description": "Optional command to execute when this rule is loaded. PORT environment variable will be set to backend_port if specified.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "examples": [
+            "npm run dev"
+          ]
+        },
         "frontend_prefix": {
           "title": "Path prefix",
           "description": "Matches request paths that start with this prefix. Matches all paths if omitted.",

@@ -1,0 +1,22 @@
+{
+    "frontend": "0.0.0.0:8080",
+    "comment": "Example configuration with command execution",
+    "rules": [
+        {
+            "frontend_prefix": "/api/",
+            "backend_port": 8000,
+            "command": "echo API server started",
+            "comment": "This rule will execute 'echo API server started' with PORT=8000"
+        },
+        {
+            "frontend_prefix": "/frontend/",
+            "backend_port": 3000,
+            "command": "echo Frontend server started",
+            "comment": "This rule will execute 'echo Frontend server started' with PORT=3000"
+        },
+        {
+            "backend_port": 9000,
+            "comment": "Default route without command"
+        }
+    ]
+}
