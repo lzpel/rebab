@@ -5,13 +5,11 @@
 		{
 			"frontend_prefix": "/api/",
 			"backend_port": 8000,
-			"command": "echo API server started",
 			"comment": "This rule will execute 'echo API server started' with PORT=8000"
 		},
 		{
 			"frontend_prefix": "/frontend/",
 			"backend_port": 3000,
-			"command": "echo Frontend server started",
 			"comment": "This rule will execute 'echo Frontend server started' with PORT=3000"
 		},
 		{

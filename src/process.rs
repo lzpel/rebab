@@ -85,9 +85,17 @@ impl ProcessManager {
 				Ok(Some(status)) => {
 					// Any process exit (success or failure) triggers shutdown
 					let msg = if status.success() {
-						format!("Process [{}] exited successfully (exit code: {:?})", rule_id, status.code())
+						format!(
+							"Process [{}] exited successfully (exit code: {:?})",
+							rule_id,
+							status.code()
+						)
 					} else {
-						format!("Process [{}] exited with error (exit code: {:?})", rule_id, status.code())
+						format!(
+							"Process [{}] exited with error (exit code: {:?})",
+							rule_id,
+							status.code()
+						)
 					};
 					crate::log::log(&msg);
 					exited_rules.push(rule_id.clone());
