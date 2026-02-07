@@ -55,20 +55,47 @@ impl FromStr for Rule {
 }
 
 #[derive(Debug, Parser, Clone)]
-#[command(author, version)]
+#[command(
+	name = "rebab",
+	author,
+	version,
+	about = "A simple reverse proxy with process management",
+	long_about = "rebab is a lightweight reverse proxy that allows you to route traffic to different backends based on path prefixes. It can also manage backend processes (like 'npm run dev') automatically.",
+	after_help = "EXAMPLES:
+    # Use a configuration file
+    $ rebab -i config.json
+
+    # Simple routing: /api -> 3000, others -> 8080
+    $ rebab --rule \"prefix=/api,port=3000\" --rule \"port=8080\"
+
+    # Automatic process management (sets PORT=3000 for the command)
+    $ rebab --rule \"prefix=/api,port=3000,command=npm run dev\"
+
+    # Custom frontend address and mixed rules
+    $ rebab --frontend 127.0.0.1:9000 --rule \"port=8080\""
+)]
 pub struct Args {
 	#[arg(
 		short = 'i',
 		long = "input",
 		value_name = "FILE",
-		help = "path for config json"
+		help = "Path to the configuration JSON file"
 	)]
 	pub input: Option<PathBuf>,
 
-	#[arg(long, help = "Socket address to listen on")]
+	#[arg(
+		long,
+		value_name = "ADDR",
+		help = "Socket address to listen on (default: 0.0.0.0:8080)"
+	)]
 	pub frontend: Option<std::net::SocketAddr>,
 
-	#[arg(long = "rule", value_parser = Rule::from_str, help = "Add a routing rule (format: prefix=/p,host=example.com,port=80)")]
+	#[arg(
+		long = "rule",
+		value_name = "RULE",
+		value_parser = Rule::from_str,
+		help = "Add a routing rule. Format: 'prefix=/path,host=localhost,port=80,command=...'"
+	)]
 	pub rules: Vec<Rule>,
 }
 

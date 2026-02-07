@@ -9,6 +9,7 @@ pub async fn serve(
 	proxy: impl crate::proxy::Proxy,
 ) -> std::result::Result<(), Box<dyn std::error::Error + Send + Sync>> {
 	crate::log::log(format!("start listen {}", addr));
+	crate::log::log(format!("open {}", crate::log::addr_to_url(addr)));
 	let listener = match TcpListener::bind(addr).await {
 		Ok(v) => Ok(v),
 		Err(e) => {
